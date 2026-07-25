@@ -1,0 +1,58 @@
+CÀI VÀO PANEL TEST AN TOÀN - HOSKT V17
+======================================
+
+1) Xác định root panel test cổng 8081:
+
+sudo -i
+nginx -T 2>/dev/null | grep -n -B8 -A25 "listen 8081"
+
+Phải thấy dạng:
+root /var/www/pterodactyl-test/public;
+
+2) Kiểm tra ZIP:
+
+ls -lh /var/www/pterodactyl/hoskt_native_multi_plugins_merge_v21_mobile_preset_aspect_contrast_fix_v17_v9_preserved_test_safe.zip
+
+3) Giải nén:
+
+rm -rf /tmp/hoskt-native-v17-test
+mkdir -p /tmp/hoskt-native-v17-test
+unzip -o \
+  /var/www/pterodactyl/hoskt_native_multi_plugins_merge_v21_mobile_preset_aspect_contrast_fix_v17_v9_preserved_test_safe.zip \
+  -d /tmp/hoskt-native-v17-test
+
+4) Dry-run và cài thật:
+
+cd /tmp/hoskt-native-v17-test/hoskt_native_multi_plugins_merge_v21
+bash install-test-safe.sh \
+  --panel=/var/www/pterodactyl-test \
+  --port=8081 \
+  --yes \
+  --dry-run
+
+# Khi dry-run báo OK:
+bash install-test-safe.sh \
+  --panel=/var/www/pterodactyl-test \
+  --port=8081 \
+  --yes
+
+Dấu build thành công:
+==> Build frontend thành công
+Xong HOSKT Native Multi Plugins v21 + V17 contrast fix, giữ nguyên V16/V15/V14/V9.
+
+5) Kiểm tra Android Chrome bằng tab ẩn danh:
+- Header, nút hamburger và sidebar phải giữ nguyên đúng theme HOSKT hiện tại.
+- Không được xuất hiện logo HOSKT trong preview Classic Colors hoặc các nút format.
+- Không được xuất hiện logo HOSKT trong checkbox/preset Rainbow Builder.
+- Placeholder API phải giữ nguyên chữ category; logo không được thay chữ.
+- Reload, cuộn lên xuống và chuyển tool nhiều lần.
+
+Dấu DOM/JS:
+data-hoskt-scroll-fix="v9-preserved-v14"
+window.__HOSKT_LOGO_TARGET_FIX__="v23-safe"
+
+Sau cài đặt, kiểm tra nút Copy trên HTTP :8081 và thử MOTD kết thúc bằng ký tự &: trang không được văng ErrorBoundary.
+
+- Preset đang chọn trong Rainbow Builder phải hiện chữ trắng rõ.
+- Các mã &0..&f trong Aspects MOTD Creator phải tự đổi chữ đen/trắng để đọc rõ.
+- Chuỗi &, &&, &r và Hello & vẫn không được gây crash.

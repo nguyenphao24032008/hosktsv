@@ -1,0 +1,16 @@
+1) Xác định panel test cổng 8081:
+nginx -T 2>/dev/null | grep -n -B8 -A25 "listen 8081"
+
+2) Giải nén ZIP vào /tmp rồi chạy dry-run bằng script V20.1:
+bash install-test-safe-v20.sh --panel=/var/www/pterodactyl-test --port=8081 --yes --dry-run
+
+3) Chỉ khi dry-run xác nhận đúng panel test và database test riêng (không thêm --no-migrate):
+bash install-test-safe-v20.sh --panel=/var/www/pterodactyl-test --port=8081 --yes --restart
+
+4) Kiểm tra:
+- Version Manager không còn icon ảnh hỏng.
+- Vanilla/Snapshot/Paper/Purpur/Sponge/BungeeCord/Waterfall/Velocity/Forge/Fabric/Mohist/Magma/CatServer dùng nguồn native/upstream.
+- Paper/Minecraft 26.1+ tự chọn Java 25; các bản cũ tự chọn Java 8/16/17/21 phù hợp.
+- Spigot/Forge hiện thông báo chuẩn bị installer; sau đó bấm Start server một lần để hoàn tất.
+- Chọn Modpacks sẽ mở /server/<id>/modpacks.
+- Sidebar HOSKT, hamburger, header/logo, footer và Minecraft Utilities V9 không thay đổi.

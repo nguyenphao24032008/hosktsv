@@ -1,0 +1,16 @@
+V20.1 additions/changes on top of the original V19 package:
+- payload/files/app/Services/Minecraft/NativeVersionCatalogService.php
+- payload/files/app/Http/Controllers/Api/Client/Servers/VersionsController.php
+- payload/files/app/Services/Minecraft/Modpacks/CurseForgeModpackService.php
+- payload/files/resources/scripts/components/server/versions/McVersionsRow.tsx
+- payload/files/resources/scripts/components/server/versions/McVersionsContainer.tsx
+- payload/files/public/extensions/hoskt-native-version-manager/icons/*.svg
+- payload/files/database/migrations/2026_07_10_000001_add_java25_to_java_eggs.php
+- tools/check_version_manager_v20.py
+- tools/v19_route_preserved_sha256.txt
+- install-test-safe-v20.sh
+- MOBILE_VERSION_MANAGER_ALL_PROVIDERS_FIX_V20.txt
+- TEST_PANEL_INSTALL_V20.txt
+
+Original V19 route-shadow files are byte-for-byte preserved.
+Original V9/V14/V15/V16/V17 runtime preservation manifest remains active.

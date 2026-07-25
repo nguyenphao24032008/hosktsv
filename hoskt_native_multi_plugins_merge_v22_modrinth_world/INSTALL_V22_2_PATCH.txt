@@ -1,0 +1,24 @@
+LỆNH CÀI NHANH PANEL TEST HOSKT V22.2
+
+ZIP_FILE="/var/www/pterodactyl/hoskt_native_multi_plugins_merge_v22_2_vanilla_cdn_complete_install_guide.zip"
+
+unzip -t "$ZIP_FILE"
+rm -rf /var/www/pterodactyl-test/hoskt_native_multi_plugins_merge_v22_modrinth_world
+unzip -o "$ZIP_FILE" -d /var/www/pterodactyl-test
+cd /var/www/pterodactyl-test/hoskt_native_multi_plugins_merge_v22_modrinth_world
+
+bash install-v22-2-vanilla-cdn-complete.sh \
+  --panel=/var/www/pterodactyl-test \
+  --port=8081 \
+  --yes \
+  --dry-run
+
+bash install-v22-2-vanilla-cdn-complete.sh \
+  --panel=/var/www/pterodactyl-test \
+  --port=8081 \
+  --yes \
+  --restart
+
+systemctl restart pteroq
+systemctl restart nginx
+systemctl status pteroq --no-pager

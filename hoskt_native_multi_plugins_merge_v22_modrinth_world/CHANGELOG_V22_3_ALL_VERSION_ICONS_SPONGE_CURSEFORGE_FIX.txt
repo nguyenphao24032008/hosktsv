@@ -1,0 +1,19 @@
+HOSKT V22.3 - ALL VERSION ICONS + SPONGE/CURSEFORGE STABILITY
+
+1. Version Manager icons
+   Vanilla, Snapshot, Spigot, Paper, Purpur, Sponge, Bungeecord, Waterfall,
+   Velocity, Forge, Fabric, Mohist, Magma, Catserver và Others đều có URL CDN riêng.
+   Khi CDN lỗi, giao diện tự chuyển sang icon local rồi default.svg.
+
+2. Sponge loading fix
+   API Sponge được giới hạn connect timeout 4 giây, tổng timeout 10 giây.
+   Khi API lỗi/chậm, Version Manager trả danh sách fallback thay vì quay vòng vô hạn.
+
+3. Modpacks / CurseForge provider freeze fix
+   - CurseForge timeout giảm còn 10 giây.
+   - Dữ liệu API được đọc phòng thủ, không gây lỗi undefined.
+   - Endpoint danh sách Modpacks không gọi đồng bộ API chi tiết của modpack đã cài.
+   - Frontend request timeout 15 giây; thanh Provider vẫn hiển thị và đổi được trong lúc tải.
+
+4. UI cleanup
+   Đã xóa dòng tiếng Anh dưới thanh chọn phiên bản theo yêu cầu.

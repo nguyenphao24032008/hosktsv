@@ -1,0 +1,23 @@
+HOSKT NATIVE MULTI PLUGINS MERGE V21 - VERSION MANAGER V20.1
+
+V20.1 được chồng lên V19 và không thay đổi các file route-shadow V19.
+Các file runtime nhạy cảm V9/V14/V15/V16/V17 vẫn được kiểm tra byte-for-byte bằng check_v17_preservation.py.
+
+Sửa trong V20.1:
+1. Xóa phụ thuộc ảnh https://cdn.bagou450.com trong Version Manager.
+2. Thêm 16 icon SVG local tại public/extensions/hoskt-native-version-manager/icons.
+3. Native catalogue cho Vanilla, Snapshot, Spigot, Paper, Purpur, SpongeVanilla,
+   BungeeCord, Waterfall, Velocity, Forge, Fabric, Mohist, Magma và CatServer.
+4. Spigot dùng BuildTools chính thức và hoàn tất ở lần khởi động server đầu tiên.
+5. Forge dùng installer chính thức và hoàn tất libraries ở lần khởi động server đầu tiên.
+6. Modpacks chuyển sang trang Modpacks Manager native của V18/V19 thay vì Bagou.
+7. CurseForge Modpacks đọc API key từ HOSKT Theme Settings hoặc CURSEFORGE_API_KEY trong .env.
+8. Chọn đúng Java 8/16/17/21/25 theo đời Minecraft; image Java 11 vẫn được giữ để tương thích dữ liệu cũ.
+9. Migration chỉ bổ sung image java_25 cho các Egg vốn đang dùng Pterodactyl Java Yolks.
+
+Lưu ý:
+- Waterfall đã EOL; bản tải cũ có thể còn dùng nhưng nên ưu tiên Velocity.
+- Mohist dùng JSON API và đường tải chính thức của MohistMC; phiên bản hiển thị phụ thuộc dữ liệu upstream còn công bố.
+- Magma/CatServer phụ thuộc release công khai của upstream; một release bị xóa sẽ không thể cài lại.
+- Spigot first-start cần Docker Java image có git; Pterodactyl Java Yolks chính thức có cài git.
+- Không dùng --no-migrate nếu cần Paper/Minecraft 26.1+, vì migration V20.1 bổ sung Java 25 vào danh sách Docker image của Egg Java.

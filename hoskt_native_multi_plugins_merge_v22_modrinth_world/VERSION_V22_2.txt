@@ -1,0 +1,4 @@
+HOSKT Native Multi Plugins V22.2
+Build: Vanilla CDN icon + bundled PNG fallback + complete offline installation guide
+Base: V22.1 pagination / inline Modpacks / image fallback; V22 Modrinth World Manager
+CDN: https://cdn.nguyenhung401.id.vn/img/vanilla-icon.jpg

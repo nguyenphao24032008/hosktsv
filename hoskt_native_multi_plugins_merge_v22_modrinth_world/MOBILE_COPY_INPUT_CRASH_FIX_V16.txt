@@ -1,0 +1,17 @@
+HOSKT Minecraft Utilities - Copy/Input Crash Fix V16
+
+Giữ nguyên:
+- Sidebar HOSKT gốc và nút hamburger ba gạch.
+- Logo/header/footer/bố cục/màu theme.
+- Renderer V14, repaint V9 và logo target V15.
+
+Sửa:
+1. Tất cả thao tác copy dùng helper chung. HTTPS dùng navigator.clipboard; HTTP IP:PORT dùng fallback đồng bộ document.execCommand('copy').
+2. MOTD Creator không còn đọc part[1] khi chuỗi chỉ còn '&'. Mã màu/format thiếu ký tự được hiển thị như văn bản bình thường thay vì làm React crash.
+3. Reset MOTD chèn đúng một &r.
+4. Guard ref sau setTimeout và guard JSON localStorage của Recent Emojis.
+
+Kiểm tra:
+python3 tools/check_mcutils_repaint_fix.py
+python3 tools/check_dynamic_logo_target_fix.py --package .
+python3 tools/check_mcutils_interaction_fix.py

@@ -1,0 +1,4 @@
+HOSKT V22.2.1
+Documentation/install-guide patch over V22.2.
+Adds corrected instructions for keeping the ZIP in /var/www/pterodactyl while extracting and installing only into /var/www/pterodactyl-test.
+No feature code was removed.

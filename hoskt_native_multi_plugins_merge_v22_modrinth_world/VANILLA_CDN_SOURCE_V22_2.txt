@@ -1,0 +1,12 @@
+VANILLA ICON SOURCE - HOSKT V22.2
+
+URL dùng trong Version Manager:
+https://cdn.nguyenhung401.id.vn/img/vanilla-icon.jpg
+
+Fallback được đóng gói:
+payload/files/public/extensions/hoskt-native-version-manager/icons/vanilla-icon.png
+
+Lưu ý kỹ thuật:
+Tại thời điểm đóng gói, URL có đuôi .jpg nhưng dữ liệu tải về được nhận dạng là tài nguyên Windows ICO.
+Bộ cài đã chuyển dữ liệu này thành PNG 256x256 để làm fallback local ổn định.
+Version Manager vẫn thử URL CDN trước đúng theo yêu cầu.

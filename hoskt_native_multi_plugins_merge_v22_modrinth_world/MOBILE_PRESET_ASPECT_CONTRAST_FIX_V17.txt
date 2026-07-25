@@ -1,0 +1,8 @@
+HOSKT Minecraft Utilities - Preset/Aspect Contrast Fix V17
+
+Phạm vi thay đổi tối thiểu trên nền V16:
+- Rainbow Builder: ép chữ tên preset được chọn luôn sáng, kể cả khi CSS theme áp màu tối cho aria-pressed.
+- MOTD Creator: tự chọn chữ đen hoặc trắng theo độ sáng thực tế của từng ô màu để mã &0..&f dễ đọc.
+- Không đổi kích thước, vị trí, grid, sidebar, hamburger, logo, footer hoặc màu nền theme.
+- Giữ nguyên parser an toàn cho &, &&, &r, Hello & và toàn bộ copy fallback V16.
+- Giữ nguyên sửa logo V15, sidebar native V14 và repaint V9.

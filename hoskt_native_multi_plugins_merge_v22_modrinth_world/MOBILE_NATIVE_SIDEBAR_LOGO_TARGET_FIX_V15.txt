@@ -1,0 +1,21 @@
+HOSKT MOBILE NATIVE SIDEBAR + LOGO TARGET FIX V15
+=================================================
+
+Bản này giữ nguyên giao diện V14 và sidebar/hamburger native của theme HOSKT.
+
+Nguyên nhân thật của ba lỗi ảnh:
+public/hostkt/hoskt-dynamic-logo-fix-v22.js quét rộng mọi div/span trong body và thay node được chọn bằng logo. Khi trang cuộn, nó có thể chọn nhầm preview Classic Colors, control Rainbow Builder hoặc tên category Placeholder API.
+
+V15 thay helper đó bằng bản an toàn:
+- không quét body div/span;
+- không dùng innerHTML để chèn logo;
+- chỉ normalize logo native có selector chính xác;
+- dọn target cũ;
+- cache-bust sang ?v=23-safe.
+
+Không thay đổi:
+- Sidebar.tsx và bố cục sidebar hiện tại;
+- nút ba gạch hamburger mở menu;
+- logo React gốc của header/sidebar;
+- menu ADMIN/ADDONS/PANEL;
+- lõi chống repaint V9 và renderer V14 của Minecraft Utilities.

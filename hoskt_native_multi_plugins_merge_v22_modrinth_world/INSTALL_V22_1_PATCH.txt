@@ -1,0 +1,20 @@
+HƯỚNG DẪN CÀI HOSKT V22.1
+
+Tên ZIP chính thức:
+  hoskt_native_multi_plugins_merge_v22_1_pagination_inline_modpacks_page_jump_image_fallback_final.zip
+
+Lệnh dry-run:
+  cd /var/www/pterodactyl-test/hoskt_native_multi_plugins_merge_v22_modrinth_world
+  bash install-v22-1-pagination-modpacks-cdn-fix.sh     --panel=/var/www/pterodactyl-test     --port=8081     --yes     --dry-run
+
+Lệnh cài:
+  bash install-v22-1-pagination-modpacks-cdn-fix.sh     --panel=/var/www/pterodactyl-test     --port=8081     --yes     --restart
+
+Sau cài:
+  systemctl restart pteroq
+  systemctl restart nginx
+  systemctl status pteroq --no-pager
+
+Log:
+  journalctl -u pteroq -f
+  tail -f /var/www/pterodactyl-test/storage/logs/laravel.log

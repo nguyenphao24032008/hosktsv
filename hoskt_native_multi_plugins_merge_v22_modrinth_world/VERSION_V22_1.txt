@@ -1,0 +1,4 @@
+HOSKT V22.1 FINAL
+Build: Version/Mod/World page jump + total pages + embedded Modpacks + local image fallback
+Base: HOSKT V22 Modrinth World Manager
+Base ZIP SHA-256: 4d515dd80a92b8628f7b4a738be2bad560f7f8bf92b1352a0927ef6148033650

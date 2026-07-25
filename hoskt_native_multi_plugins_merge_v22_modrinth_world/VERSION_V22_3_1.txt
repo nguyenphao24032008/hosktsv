@@ -1,0 +1,6 @@
+HOSKT V22.3.1
+- Sửa lỗi cài panel thật khi wrapper.blade.php và admin.blade.php chưa có thẻ dynamic-logo helper.
+- Tự chèn đúng một helper /hostkt/hoskt-dynamic-logo-fix-v22.js?v=23-safe.
+- Chuẩn hóa asset()/url()/query cũ, xóa duplicate và bảo đảm cài lại idempotent.
+- Checker phát hiện helper thiếu, query cũ và tham chiếu trùng.
+- Thêm regression test; giữ nguyên byte-for-byte các runtime-sensitive file V9/V14/V15/V16/V17.

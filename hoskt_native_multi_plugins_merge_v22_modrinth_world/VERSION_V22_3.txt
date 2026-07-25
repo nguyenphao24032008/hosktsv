@@ -1,0 +1,7 @@
+HOSKT V22.3
+- Gán URL CDN chính xác cho toàn bộ loại phần mềm trong Version Manager.
+- Fallback ảnh: CDN -> PNG local cho Vanilla / SVG local cho provider -> default.svg.
+- Xóa dòng: Modpacks are displayed directly inside Version Manager and do not open another page.
+- Sponge dùng timeout ngắn và danh sách fallback để không quay vòng vô hạn khi API upstream lỗi/chậm.
+- CurseForge dùng timeout ngắn, parse dữ liệu an toàn và không chờ request chi tiết modpack đã cài khi đổi provider.
+- Request frontend Modpacks có timeout 15 giây và giao diện vẫn giữ thanh Provider trong lúc tải.

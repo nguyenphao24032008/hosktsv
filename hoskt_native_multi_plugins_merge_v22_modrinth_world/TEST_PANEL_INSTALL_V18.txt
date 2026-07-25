@@ -1,0 +1,85 @@
+CÀI V18 AN TOÀN VÀO PANEL TEST
+==============================
+
+Tên ZIP:
+hoskt_native_multi_plugins_merge_v21_mobile_manager_provider_fix_v18_v9_preserved_test_safe.zip
+
+Giả sử:
+- ZIP được upload vào /var/www/pterodactyl
+- Panel test ở /var/www/pterodactyl-test
+- Nginx panel test nghe cổng 8081
+
+1) Xác nhận đúng panel test:
+
+sudo -i
+nginx -T 2>/dev/null | grep -n -B8 -A25 "listen 8081"
+
+Chỉ tiếp tục khi thấy:
+root /var/www/pterodactyl-test/public;
+
+2) Giải nén:
+
+rm -rf /tmp/hoskt-native-v18-test
+mkdir -p /tmp/hoskt-native-v18-test
+unzip -o \
+  /var/www/pterodactyl/hoskt_native_multi_plugins_merge_v21_mobile_manager_provider_fix_v18_v9_preserved_test_safe.zip \
+  -d /tmp/hoskt-native-v18-test
+
+cd /tmp/hoskt-native-v18-test/hoskt_native_multi_plugins_merge_v21
+
+3) Dry-run bắt buộc:
+
+bash install-test-safe.sh \
+  --panel=/var/www/pterodactyl-test \
+  --port=8081 \
+  --yes \
+  --dry-run
+
+Dry-run phải xác nhận:
+- Nginx cổng 8081 trỏ đúng panel test.
+- Panel test không dùng chung database với panel chính.
+- Các file V9/V14/V15/V16/V17 còn nguyên SHA-256.
+- Backend Mod Manager, World Manager và Version Manager V18 có đủ marker.
+
+4) Cài thật sau khi dry-run báo OK:
+
+bash install-test-safe.sh \
+  --panel=/var/www/pterodactyl-test \
+  --port=8081 \
+  --yes
+
+Script mặc định build frontend nhưng không tự restart Nginx/PHP-FPM.
+
+5) Clear cache và restart đúng service:
+
+cd /var/www/pterodactyl-test
+php artisan optimize:clear
+chown -R www-data:www-data storage bootstrap/cache
+systemctl restart nginx
+systemctl list-units --type=service | grep -E "php.*fpm"
+
+Sau đó restart đúng tên hiện ra, ví dụ:
+systemctl restart php8.3-fpm
+
+Không dùng systemctl restart php*-fpm.
+
+6) Cấu hình CurseForge cho World Manager/CurseForge Mods:
+
+Cách 1: vào HOSKT Theme Setting > Addons, nhập CurseForge API Key trong Minecraft Mod Installer hoặc Minecraft Modpack Installer.
+
+Cách 2: thêm vào /var/www/pterodactyl-test/.env:
+CURSEFORGE_API_KEY=API_KEY_CUA_BAN
+
+Sau khi sửa .env:
+cd /var/www/pterodactyl-test
+php artisan optimize:clear
+
+Modrinth trong Mod Manager không cần CurseForge API key.
+
+7) Kiểm tra:
+- Mod Manager không còn “This addon is not installed”.
+- Tìm mod bằng Modrinth, mở danh sách version và thử cài vào /mods.
+- World Manager hiển thị map khi key hợp lệ; thiếu key phải hiện lỗi rõ ràng thay vì báo không có map.
+- Version Manager thử Vanilla, Paper, Purpur, Fabric và Velocity.
+- Header, hamburger, sidebar, logo, footer giữ nguyên.
+- Classic Colors/Rainbow/Placeholder/MOTD/Copy vẫn giữ toàn bộ bản sửa V9-V17.

@@ -1,0 +1,43 @@
+ROLLBACK HOSKT V22.2
+===================
+
+Bộ cài tạo các backup có timestamp dưới /root, gồm:
+  /root/hoskt-v22-2-vanilla-cdn-backup-YYYYMMDD-HHMMSS
+  /root/hoskt-v22-modrinth-world-backup-YYYYMMDD-HHMMSS
+  /root/hoskt-version-manager-v20-extra-backup-YYYYMMDD-HHMMSS
+  /root/hoskt-native-multi-plugins-v21-backup-YYYYMMDD-HHMMSS
+
+1. Liệt kê backup mới nhất:
+
+  ls -ldt \
+    /root/hoskt-v22-2-vanilla-cdn-backup-* \
+    /root/hoskt-v22-modrinth-world-backup-* \
+    /root/hoskt-version-manager-v20-extra-backup-* \
+    /root/hoskt-native-multi-plugins-v21-backup-* 2>/dev/null
+
+2. Chọn đúng backup có thời gian trùng với lần cài.
+
+3. Rollback riêng icon Vanilla V22.2:
+
+  PANEL=/var/www/pterodactyl-test
+  BACKUP=/root/hoskt-v22-2-vanilla-cdn-backup-YYYYMMDD-HHMMSS
+  cp -a "$BACKUP/." "$PANEL/"
+
+4. Rollback toàn bộ patch bằng backup chính của lần cài:
+
+  PANEL=/var/www/pterodactyl-test
+  BACKUP=/root/hoskt-native-multi-plugins-v21-backup-YYYYMMDD-HHMMSS
+  cp -a "$BACKUP/." "$PANEL/"
+
+5. Build và clear cache:
+
+  cd "$PANEL"
+  export NODE_OPTIONS=${NODE_OPTIONS:---openssl-legacy-provider}
+  yarn build:production || yarn run build:production || yarn build
+  php artisan optimize:clear
+  systemctl restart pteroq
+  systemctl restart nginx
+
+CẢNH BÁO:
+- Không chép backup Panel Test sang Panel chính.
+- Không dùng ký tự wildcard trong lệnh cp khi chưa xác định đúng thư mục timestamp.

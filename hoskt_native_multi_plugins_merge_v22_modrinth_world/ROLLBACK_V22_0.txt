@@ -1,0 +1,30 @@
+ROLLBACK HOSKT V22.1 VỀ TRẠNG THÁI TRƯỚC KHI CÀI
+
+Bộ cài tự tạo nhiều thư mục backup dưới /root, gồm:
+  /root/hoskt-v22-1-ui-backup-YYYYMMDD-HHMMSS
+  /root/hoskt-v22-modrinth-world-backup-YYYYMMDD-HHMMSS
+  /root/hoskt-native-multi-plugins-v21-backup-YYYYMMDD-HHMMSS
+
+1. Xem backup mới nhất:
+  ls -ldt /root/hoskt-v22-1-ui-backup-* /root/hoskt-v22-modrinth-world-backup-* /root/hoskt-native-multi-plugins-v21-backup-* 2>/dev/null
+
+2. Dừng thao tác trên panel test và chọn đúng thư mục backup theo thời điểm cài.
+
+3. Khôi phục bằng cp -a, ví dụ:
+  PANEL=/var/www/pterodactyl-test
+  BACKUP=/root/hoskt-native-multi-plugins-v21-backup-YYYYMMDD-HHMMSS
+  cp -a "$BACKUP/." "$PANEL/"
+
+4. Nếu chỉ rollback hai component phân trang dùng chung:
+  UI_BACKUP=/root/hoskt-v22-1-ui-backup-YYYYMMDD-HHMMSS
+  cp -a "$UI_BACKUP/." /var/www/pterodactyl-test/
+
+5. Build và clear cache lại:
+  cd /var/www/pterodactyl-test
+  export NODE_OPTIONS=${NODE_OPTIONS:---openssl-legacy-provider}
+  yarn build:production || yarn run build:production || yarn build
+  php artisan optimize:clear
+  systemctl restart pteroq
+  systemctl restart nginx
+
+Không dùng backup của panel test để ghi lên panel chính.

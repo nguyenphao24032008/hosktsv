@@ -1,0 +1,33 @@
+HOSKT Native Multi Plugins v21 - Manager/Provider Fix V18
+=========================================================
+
+V18 được tạo trực tiếp trên nền V17 và chỉ bổ sung backend/provider cho ba trang đang lỗi.
+Không thay đổi giao diện, sidebar, hamburger, logo, footer hoặc Minecraft Utilities.
+
+1. Minecraft Mod Manager
+- Bổ sung class app/Services/Mods/ModSearchService.php mà giao diện HOSKT dùng để xác định addon đã cài.
+- Modrinth hoạt động không cần API key.
+- CurseForge dùng API key trong HOSKT Theme Settings hoặc CURSEFORGE_API_KEY.
+- Giữ nguyên controller, route và giao diện Mod Manager của theme HOSKT.
+
+2. Minecraft World Manager
+- Sửa service CurseForge lấy API key từ:
+  + services.curseforge.api_key
+  + services.curseforge_api_key
+  + CURSEFORGE_API_KEY trong .env
+  + API key đã lưu trong các addon Mod/Modpack/Plugin Installer của HOSKT.
+- Không còn nuốt lỗi rồi trả danh sách rỗng giả.
+- Khi thiếu/sai key hoặc máy chủ không ra được Internet, giao diện nhận thông báo lỗi rõ ràng.
+
+3. Minecraft Version Manager
+- Bổ sung catalogue native, không cần license Bagou, cho:
+  Vanilla, Snapshot, Paper, Purpur, Velocity, Fabric và Bungeecord.
+- Nguồn tải được lấy trực tiếp từ metadata/API chính thức của từng dự án.
+- Frontend hiểu phản hồi download đã hoàn tất từ Wings và vẫn giữ đường polling cũ cho provider Bagou.
+- Các loại cũ chưa có provider native (Spigot, Sponge, Waterfall, Forge, Mohist, Magma, Catserver, modpacks...) vẫn dùng cơ chế Bagou cũ.
+
+4. Bảo toàn V9-V17
+- Toàn bộ file nhạy cảm của Minecraft Utilities V9/V14/V15/V16/V17 và script patch sidebar V14 được kiểm tra SHA-256 byte-for-byte.
+- V18 không sửa Classic Colors, Rainbow Builder, Placeholder API, MOTD Creator, clipboard helper, logo helper hoặc app shell HOSKT.
+- Chạy: python3 tools/check_v17_preservation.py
+- Chạy: python3 tools/check_manager_services_fix.py

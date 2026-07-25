@@ -1,0 +1,14 @@
+V19 sửa lỗi Modpacks vẫn hiện "Feature Not Available / This addon is not installed" sau khi V18 đã cài thành công.
+
+Nguyên nhân:
+- Theme HOSKT có sẵn route /modpacks dùng component cũ @/components/server/modpacks/ModpacksContainer.
+- V18 thêm route /modpacks dùng NativeHOSKTModpacksContainer nhưng không xóa route cũ.
+- React Router dùng route khớp đầu tiên, nên component cũ che route native V18.
+
+V19:
+- Xóa đúng route /modpacks cũ trước khi chèn route native.
+- Xóa lazy const ModpacksContainer cũ khi không còn dùng.
+- Kiểm tra sau patch rằng chỉ còn một route /modpacks và route đó dùng NativeHOSKTModpacksContainer.
+- Giữ nguyên byte-for-byte 15 file runtime nhạy cảm V9/V14/V15/V16/V17.
+- Giữ nguyên payload backend/provider V18.
+- Chỉ thay đổi script patch route và tài liệu/kiểm tra V19.

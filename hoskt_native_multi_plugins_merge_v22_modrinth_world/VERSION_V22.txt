@@ -1,0 +1,6 @@
+Package: HOSKT Native Multi Plugins Merge
+Release: V22 Modrinth World Manager
+Build date: 2026-07-23
+Default World provider: Modrinth
+Supported archive formats: ZIP, TAR, TAR.GZ, TGZ, MRPACK
+Required world markers: level.dat or uid.dat

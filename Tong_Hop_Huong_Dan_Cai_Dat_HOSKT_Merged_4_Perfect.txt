@@ -1,0 +1,461 @@
+Tổng Hợp Hướng Dẫn Cài Đặt HOSKT (Từ V22 đến V22.3.1) Tài liệu này tổng hợp toàn bộ các hướng dẫn cài đặt, cấu hình, nâng cấp và khắc phục sự cố cho bộ công cụ HOSKT từ phiên bản V22 gốc cho đến V22.3.1.
+
+Tài liệu bao gồm tổng quan các tính năng, quy trình cài đặt chuẩn lên Panel Test, cấu hình lên Panel Thật và xử lý các bản vá lỗi.
+
+1. Các tính năng chính (Các phiên bản HOSKT V22)
+
+● Bảo toàn nguyên vẹn các bản vá V9 đến V20.1 và cấu trúc file nhạy cảm byte-for-byte. ● World Manager: Thêm Modrinth vào ô Provider. Tự động tải kết quả Modrinth với từ khóa mặc định "world" khi mở.
+
+Tải map qua queue worker (pteroq).
+
+Giải nén an toàn trong thư mục staging và chỉ cài khi phát hiện file hợp lệ (level.dat hoặc uid.dat).
+
+Hỗ trợ đọc các định dạng ZIP, TAR, TAR.GZ, TGZ và MRPACK.
+
+● Version Manager: Bổ sung provider native cho Vanilla, Snapshot, Paper, Purpur, Velocity, Fabric, Bungeecord, v.v.
+
+Các phiên bản Vanilla được hiển thị kèm Icon qua hệ thống CDN kết hợp fallback linh hoạt (CDN -> local PNG -> local SVG).
+
+Tích hợp hiển thị Modpacks trực tiếp (inline) trong Version Manager.
+
+● Cải tiến Giao diện (Pagination): Phân trang chi tiết hiển thị dạng Page X of Y và bổ sung ô nhập số trang để thao tác nhảy trang nhanh chóng trên Mod Manager, World Manager và Version Manager.
+
+● Sửa lỗi hệ thống: Bản vá V22.3.1 sửa dứt điểm lỗi Dynamic Logo không chèn được script vào panel thật (bằng cách tự động dò tìm vị trí thẻ HTML).
+
+2. Lưu ý quan trọng trước khi tiến hành
+
+● Cài đặt trên môi trường thử nghiệm: Luôn cài đặt lên Panel Test trước (Ví dụ:
+
+/var/www/pterodactyl-test, port 8081).
+
+Panel test bắt buộc phải chạy database riêng để tránh xung đột với panel chính.
+
+● Bảo toàn mã nguồn gốc: KHÔNG giải nén thư mục payload trực tiếp đè vào mã nguồn Panel mà phải sử dụng script cài đặt tự động (bash script).
+
+● Quá trình biên dịch (Build): KHÔNG sử dụng tham số --no-build. Frontend cần phải được Yarn build lại để hiển thị UI của Modrinth, Icon CDN, và thanh phân trang.
+
+● Hàng đợi tải dữ liệu: Đảm bảo Queue Worker (pteroq) đang chạy. Nếu pteroq dừng, nút Download sẽ không có tác dụng.
+
+3. Quy trình cài đặt chuẩn (Dành cho Panel Test) Quy trình dưới đây dành cho việc upload gói bộ cài vào thư mục chính, nhưng giải nén bộ cài và thực thi script tác động vào Panel Test (Port 8081).
+
+Bước 3.1: Xác định và kiểm tra tính toàn vẹn của file ZIP Upload ZIP vào server và chạy kiểm tra qua giao diện SSH (sử dụng tài khoản Root/Sudo):
+
+ZIP_FILE="/var/www/pterodactyl/hoskt_native_multi_plugins_merge_v22.zip" test -f "$ZIP_FILE" || echo "Không tìm thấy ZIP" unzip -t "$ZIP_FILE"
+
+#
+
+Dòng cuối phải báo "No errors detected" sha256sum "$ZIP_FILE"
+
+Bước 3.2: Sao lưu (Backup) cấu trúc cũ BACKUP_FILE="/root/pterodactyl-test-before-hoskt-v22-$(date +%Y%m%d-%H%M%S).tar.gz" tar -C /var/www -czf "$BACKUP_FILE" pterodactyl-test echo "Backup đã tạo:
+
+$BACKUP_FILE"
+
+Bước 3.3: Khởi tạo thư mục cài đặt TEST_PANEL="/var/www/pterodactyl-test" INSTALL_DIR="$TEST_PANEL/hoskt_native_multi_plugins_merge_v22_modrinth_world" rm -rf "$INSTALL_DIR" unzip -o "$ZIP_FILE" -d "$TEST_PANEL" cd "$INSTALL_DIR"
+
+Bước 3.4: Chạy giả lập (Dry-Run) Lệnh kiểm tra không làm thay đổi hệ thống. Đảm bảo script báo trạng thái an toàn trước khi tiếp tục.
+
+bash install-v22-2-vanilla-cdn-complete.sh \ --panel="$TEST_PANEL" \ --port=8081 \ --yes \ --dry-run
+
+Bước 3.5: Cài đặt thực tế và Build Frontend bash install-v22-2-vanilla-cdn-complete.sh \ --panel="$TEST_PANEL" \ --port=8081 \ --yes \ --restart
+
+4. Hướng dẫn nâng cấp và sửa lỗi đặc thù
+
+4.1. Nâng cấp HOSKT V22.2 (Tính năng CDN & Icon)
+
+● Sự cố hiển thị: Nếu icon bị thiếu hoặc Console báo lỗi CSP (Content-Security-Policy) chặn CDN, hệ thống tự động fallback về ảnh vanilla-icon.png local.
+
+● Script tương ứng: install-v22-2-vanilla-cdn-complete.sh ● Cách kiểm tra thủ công: Kiểm tra xem PNG local có phản hồi code 200 bằng lệnh: curl -I "http://127.0.0.1:8081/extensions/hoskt-native-version-manager/icons/vanilla-icon.png"
+
+4.2. Khắc phục lỗi HOSKT V22.3.1 (Dynamic Logo Real Panel Fix)
+
+● Nguyên nhân: Script cũ tìm kiếm chuỗi không tồn tại trên một số file wrapper.blade.php và admin.blade.php trong Panel thật, dẫn đến việc không Cache-bust tham số ?v=23-safe.
+
+● Khắc phục: V22.3.1 tự động quét và chèn thẻ script trước </body> hoặc </html> một cách an toàn.
+
+● Cách cài lên Panel chính: Phải có tham số --allow-main và trỏ đúng port thật (ví dụ: port 80).
+
+bash install-v22-3-version-icons-provider-stability.sh \ --panel=/var/www/pterodactyl \ --port=80 \ --yes \ --allow-main \ --restart
+
+5. Giám sát hệ thống & Khắc phục sự cố Thao tác / Tác vụ Dòng lệnh kiểm tra (Command) Ý nghĩa Kiểm tra Queue Worker systemctl status pteroq --no-pager Đảm bảo trình tải map/modpack đang chạy ổn định.
+
+Theo dõi tiến trình tải Queue journalctl -u pteroq -f Xem log trực tiếp trong khi nhấn Download map/modpack.
+
+Xem lỗi Panel (Laravel Log) tail -f /var/www/pterodactyl/storage/logs/laravel.log Giám sát lỗi API hoặc lỗi giải nén PHP từ backend.
+
+Xóa Cache & Xây dựng lại giao diện php artisan optimize:clear && yarn build:production Dùng khi giao diện không cập nhật tính năng (như Modrinth, Pagination) do lỗi bộ đệm.
+
+Các lỗi thường gặp khác:
+
+1. "cannot find or open": Lệnh unzip trỏ sai đường dẫn. Hãy kiểm tra lại biến ZIP_FILE. 2. Bấm Download nhưng không phản hồi: Khởi động lại service pteroq, kiểm tra kết nối Wings và dung lượng đĩa trống.
+
+3. Bị từ chối Archive (Modrinth): Do hệ thống an toàn chặn các file ZIP không chứa map hợp lệ.
+
+Yêu cầu archive phải chứa level.dat hoặc uid.dat bên trong.
+
+4. CurseForge báo thiếu API Key: Cần cấu hình key tại mục HOSKT Theme Settings > Addons > Minecraft Mod/Modpack/Plugin Installer.
+
+Khuyến cáo cuối: Hãy đảm bảo lưu trữ toàn bộ file ZIP nguyên bản và các gói backup (tại /root/hoskt-native-multi-plugins-v21-backup-...) an toàn phòng trường hợp cần hoàn tác (rollback).
+
+Tổng Hợp Hướng Dẫn Cài Đặt, Nâng Cấp và Vá Lỗi HOSKT (V15 - V22.3.1) Tài liệu này tổng hợp toàn bộ các hướng dẫn cấu hình, cài đặt, xử lý sự cố và lịch sử các bản vá (patch) cho bộ công cụ HOSKT từ V15 đến V22.3.1.
+
+Các quy trình đều hướng dẫn thao tác an toàn trên môi trường Panel Test trước khi áp dụng lên Panel thật.
+
+1. Lịch sử các bản vá lỗi (Từ V15 đến V19) Phần này tổng hợp các sửa đổi chuyên sâu về giao diện, tính năng và backend trước khi đạt đến phiên bản lớn V22.
+
+1.1. Bản vá giao diện di động & Hệ thống tiện ích (V15 - V17)
+
+● V15 (Mobile Native Sidebar + Logo Target Fix): Sửa lỗi logic chèn logo vào các tool (như Classic Colors, Rainbow Builder).
+
+Script dò tìm logo tự động chỉ quét những khu vực chính xác của header thay vì rải khắp thẻ div/span trong body.
+
+● V16 (Mobile Copy/Input Crash Fix): Khắc phục tính năng Copy không hoạt động khi truy cập qua HTTP (port 8081).
+
+Cập nhật document.execCommand('copy') cho kết nối không có chứng chỉ SSL.
+
+Ngoài ra, sửa lỗi crash React (ErrorBoundary) trong công cụ MOTD Creator khi nhập ký tự & đơn lẻ.
+
+● V17 (Preset Aspect Contrast Fix): Cải thiện khả năng đọc chữ (tương phản sáng/tối) cho các mục được chọn trong Rainbow Builder và các mã format trong MOTD Creator.
+
+1.2. Bản vá Backend & Route (V18 - V19)
+
+● V18 (Manager/Provider Fix): Bổ sung Backend API cho Mod Manager (để xóa lỗi "This addon is not installed"), World Manager (báo lỗi rõ ràng khi cấu hình sai CurseForge API Key) và Version Manager (Bổ sung provider Native cho Vanilla, Paper, Purpur, Fabric...).
+
+*Lưu ý:
+
+Modrinth hoạt động không cần API Key, nhưng CurseForge vẫn cần key khai báo trong Theme Settings hoặc biến môi trường CURSEFORGE_API_KEY.
+
+● V19 (Modpack Route Shadow Fix): Khắc phục triệt để lỗi "Feature Not Available" trên /modpacks do route cũ của theme chèn đè lên route mới từ V18.
+
+Script chỉ vá duy nhất bộ định tuyến (router) của React.
+
+2. Tính năng chính trên các bản V22 (V22, V22.1, V22.2, V22.3.1)
+
+● Bảo toàn nguyên vẹn mọi cấu trúc bản vá V9 đến V20.1 byte-for-byte. ● World Manager (Modrinth): Tích hợp nguồn Modrinth, tự động tải kết quả theo từ khóa mặc định.
+
+Hỗ trợ giải nén an toàn qua Queue worker (pteroq) và hỗ trợ đa định dạng ZIP, TAR, MRPACK.
+
+Yêu cầu archive phải chứa level.dat hoặc uid.dat.
+
+● Version Manager (CDN & Icon): Tích hợp icon qua CDN cho Vanilla (https://cdn.nguyenhung401.id.vn/img/vanilla-icon.jpg).
+
+Hỗ trợ Fallback xuống ảnh Local dự phòng (PNG -> SVG -> Default SVG).
+
+Danh sách Modpack được nhúng trực tiếp (Inline).
+
+● Pagination (Cải tiến Giao diện): Bổ sung thanh phân trang (Page X of Y) và ô nhảy số trang cho Mod Manager, World Manager và Version Manager.
+
+● V22.3.1 (Dynamic Logo Real Panel Fix): Sửa dứt điểm lỗi dò tìm vị trí thẻ DOM ở wrapper.blade.php và admin.blade.php trên Panel thật.
+
+Đảm bảo script được chèn an toàn trước thẻ </body>.
+
+3. Lưu ý quan trọng & Chuẩn bị hệ thống
+
+● Môi trường thử nghiệm: Luôn cài đặt lên Panel Test trước (Ví dụ:
+
+/var/www/pterodactyl-test, port 8081).
+
+Panel test phải dùng database độc lập để không ảnh hưởng dữ liệu chính.
+
+● Không chép đè tệp tin rác: Không được giải nén thư mục payload/files ghi đè thẳng vào Panel, phải thực thi file bash cài đặt.
+
+● Biên dịch giao diện (Frontend): Không dùng tùy chọn --no-build. Giao diện (React/Yarn) cần được Build lại hoàn chỉnh để hiển thị tính năng Modrinth và các giao diện chỉnh sửa mới.
+
+4. Quy trình cài đặt chuẩn (Cài từ Gốc sang Test Panel)
+
+Bước 4.1: Kiểm tra cấu trúc ZIP & Định dạng Nginx Đảm bảo Panel Test đang chạy trên Nginx (Port 8081):
+
+sudo -i nginx -T 2>/dev/null | grep -n -B8 -A25 "listen 8081"
+
+#
+
+Ph ả i xu ấ t hi ệ n th ư m ụ c g ố c:
+
+root /var/www/pterodactyl-test/public;
+
+Bước 4.2: Giải nén & Sao lưu (Backup) Test Panel ZIP_FILE="/var/www/pterodactyl/hoskt_native_multi_plugins_merge_v22.
+
+zip" TEST_PANEL="/var/www/pterodactyl-test" INSTALL_DIR="$TEST_PANEL/hoskt_native_multi_plugins_merge_v22_modrin th_world"
+
+#
+
+Backup:
+
+tar -C /var/www -czf "/root/pterodactyl-test-backup-$(date +%Y%m%d-%H%M%S).tar.gz" pterodactyl-test rm -rf "$INSTALL_DIR" unzip -o "$ZIP_FILE" -d "$TEST_PANEL" cd "$INSTALL_DIR"
+
+Bước 4.3: Chạy giả lập (Dry-run) và Cài đặt thật
+
+# Ch ạ y Dry-Run đ ể ki ể m tra t ươ ng thích an toàn:
+
+bash install-v22-2-vanilla-cdn-complete.sh --panel="$TEST_PANEL" --port=8081 --yes --dry-run
+
+#
+
+Ch ạ y l ệ nh cài th ậ t và ti ế n hành Build Frontend (restart queue/nginx):
+
+bash install-v22-2-vanilla-cdn-complete.sh --panel="$TEST_PANEL" --port=8081 --yes --restart
+
+Bước 4.4: Dọn Cache và Khởi động dịch vụ PHP Nếu không dùng tham số --restart, hãy thực hiện thủ công:
+
+cd /var/www/pterodactyl-test php artisan optimize:clear chown -R www-data:www-data storage bootstrap/cache systemctl restart pteroq systemctl restart nginx
+
+#
+
+Xác đ ị nh phiên b ả n PHP và restart service systemctl list-units --type=service | grep -E "php.*fpm" systemctl restart php8.3-fpm
+
+#
+
+(Thay s ố phiên b ả n cho phù h ợ p)
+
+5. Cài đặt HOSKT V22.3.1 lên Panel Thật (Real Panel) Khi đã kiểm tra kỹ trên bản Test, bạn tiến hành cài đặt lên hệ thống thật.
+
+bash install-v22-3-version-icons-provider-stability.sh \ --panel=/var/www/pterodactyl \ --port=80 \ --yes \ --allow-main \ --restart
+
+● Tham số --allow-main là bắt buộc để xác nhận cài lên hệ thống chạy production. ● Nếu Nginx của bạn không nghe Port 80, hãy đổi --port hoặc có thể dùng thêm cờ --skip-nginx-check (Cần cực kỳ cẩn thận với đường dẫn panel).
+
+6. Giám sát & Khắc phục lỗi thường gặp Sự cố Lệnh kiểm tra / Cách xử lý Queue Worker pteroq dừng / Map không tải systemctl status pteroq --no-pager Theo dõi: journalctl -u pteroq -f Lỗi chức năng / Blank Page / HTTP 500 tail -f /var/www/pterodactyl/storage/logs/laravel.log Để phát hiện lỗi kết nối API.
+
+Giao diện không đổi / CDN báo CSP lỗi php artisan optimize:clear && yarn build:production Dùng Tab Ẩn danh (Incognito) hoặc xóa Cache Web.
+
+Thiếu API CurseForge Bổ sung key vào .env (Biến Sự cố Lệnh kiểm tra / Cách xử lý CURSEFORGE_API_KEY) hoặc qua Theme Settings. Chạy lệnh optimize:clear sau khi sửa file .env.
+
+Hoàn tác hệ thống (Rollback): Nếu cần thiết, bạn có thể copy trở lại thư mục backup (/root/pterodactyl-test-backup-...) và chạy Yarn build lại.
+
+Tuyệt đối không dùng backup của panel test để sao chép đè sang panel gốc.
+
+Tổng Hợp Hướng Dẫn Cài Đặt HOSKT (Từ V22 đến V22.3.1) Tài liệu này tổng hợp toàn bộ các hướng dẫn cài đặt, cấu hình, nâng cấp và khắc phục sự cố cho bộ công cụ HOSKT từ phiên bản V22 gốc cho đến V22.3.1.
+
+Tài liệu bao gồm tổng quan các tính năng, quy trình cài đặt chuẩn lên Panel Test, cấu hình lên Panel Thật và xử lý các bản vá lỗi.
+
+1. Các tính năng chính (Các phiên bản HOSKT V22)
+
+● Bảo toàn nguyên vẹn các bản vá V9 đến V20.1 và cấu trúc file nhạy cảm byte-for-byte. ● World Manager: Thêm Modrinth vào ô Provider. Tự động tải kết quả Modrinth với từ khóa mặc định "world" khi mở.
+
+Tải map qua queue worker (pteroq).
+
+Giải nén an toàn trong thư mục staging và chỉ cài khi phát hiện file hợp lệ (level.dat hoặc uid.dat).
+
+Hỗ trợ đọc các định dạng ZIP, TAR, TAR.GZ, TGZ và MRPACK.
+
+● Version Manager: Bổ sung provider native cho Vanilla, Snapshot, Paper, Purpur, Velocity, Fabric, Bungeecord, v.v.
+
+Các phiên bản Vanilla được hiển thị kèm Icon qua hệ thống CDN (https://cdn.nguyenhung401.id.vn/img/vanilla-icon.jpg) kết hợp fallback linh hoạt (CDN -> local PNG -> local SVG -> default SVG).
+
+Tích hợp hiển thị Modpacks trực tiếp (inline) trong Version Manager.
+
+● Cải tiến Giao diện (Pagination): Phân trang chi tiết hiển thị dạng Page X of Y và bổ sung ô nhập số trang để thao tác nhảy trang nhanh chóng trên Mod Manager, World Manager và Version Manager.
+
+● Sửa lỗi hệ thống: Bản vá V22.3.1 sửa dứt điểm lỗi Dynamic Logo không chèn được script vào panel thật (bằng cách tự động dò tìm vị trí thẻ HTML).
+
+2. Lưu ý quan trọng trước khi tiến hành
+
+● Cài đặt trên môi trường thử nghiệm: Luôn cài đặt lên Panel Test trước (Ví dụ:
+
+/var/www/pterodactyl-test, port 8081).
+
+Panel test bắt buộc phải chạy database riêng để tránh xung đột với panel chính.
+
+● Bảo toàn mã nguồn gốc: KHÔNG giải nén thư mục payload trực tiếp đè vào mã nguồn Panel mà phải sử dụng script cài đặt tự động (bash script).
+
+● Quá trình biên dịch (Build): KHÔNG sử dụng tham số --no-build. Frontend cần phải được Yarn build lại để hiển thị UI của Modrinth, Icon CDN, và thanh phân trang.
+
+● Hàng đợi tải dữ liệu: Đảm bảo Queue Worker (pteroq) đang chạy. Nếu pteroq dừng, nút Download sẽ không có tác dụng.
+
+3. Quy trình cài đặt chuẩn (Dành cho Panel Test) Quy trình dưới đây dành cho việc upload gói bộ cài vào thư mục chính, nhưng giải nén bộ cài và thực thi script tác động vào Panel Test (Port 8081).
+
+Bước 3.1: Xác định và kiểm tra tính toàn vẹn của file ZIP Upload ZIP vào server và chạy kiểm tra qua giao diện SSH (sử dụng tài khoản Root/Sudo):
+
+ZIP_FILE="/var/www/pterodactyl/hoskt_native_multi_plugins_merge_v22.zip" test -f "$ZIP_FILE" || echo "Không tìm thấy ZIP" unzip -t "$ZIP_FILE"
+
+#
+
+Dòng cuối phải báo "No errors detected" sha256sum "$ZIP_FILE"
+
+Bước 3.2: Sao lưu (Backup) cấu trúc cũ BACKUP_FILE="/root/pterodactyl-test-before-hoskt-v22-$(date +%Y%m%d-%H%M%S).tar.gz" tar -C /var/www -czf "$BACKUP_FILE" pterodactyl-test echo "Backup đã tạo:
+
+$BACKUP_FILE"
+
+Bước 3.3: Khởi tạo thư mục cài đặt TEST_PANEL="/var/www/pterodactyl-test" INSTALL_DIR="$TEST_PANEL/hoskt_native_multi_plugins_merge_v22_modrinth_world" rm -rf "$INSTALL_DIR" unzip -o "$ZIP_FILE" -d "$TEST_PANEL" cd "$INSTALL_DIR"
+
+Bước 3.4: Chạy giả lập (Dry-Run) Lệnh kiểm tra không làm thay đổi hệ thống. Đảm bảo script báo trạng thái an toàn trước khi tiếp tục.
+
+bash install-v22-2-vanilla-cdn-complete.sh \ --panel="$TEST_PANEL" \ --port=8081 \ --yes \ --dry-run
+
+Bước 3.5: Cài đặt thực tế và Build Frontend bash install-v22-2-vanilla-cdn-complete.sh \ --panel="$TEST_PANEL" \ --port=8081 \ --yes \ --restart
+
+4. Hướng dẫn nâng cấp và sửa lỗi đặc thù
+
+4.1. Nâng cấp HOSKT V22.2 (Tính năng CDN & Icon)
+
+● Sự cố hiển thị: Nếu icon bị thiếu hoặc Console báo lỗi CSP (Content-Security-Policy) chặn CDN, hệ thống tự động fallback về ảnh vanilla-icon.png local.
+
+Không cần tắt CSP.
+
+● Kiểm tra code chứa URL:
+
+PANEL=/var/www/pterodactyl-test grep -nF "https://cdn.nguyenhung401.id.vn/img/vanilla-icon.jpg" \ "$PANEL/resources/scripts/components/server/versions/McVersionsRow.tsx"
+
+● Cách kiểm tra thủ công: Kiểm tra xem PNG local có phản hồi code 200 bằng lệnh: curl -I "http://127.0.0.1:8081/extensions/hoskt-native-version-manager/icons/vanilla-icon.png"
+
+4.2. Khắc phục lỗi HOSKT V22.3.1 (Dynamic Logo Real Panel Fix)
+
+● Nguyên nhân: Script cũ tìm kiếm chuỗi không tồn tại trên một số file wrapper.blade.php và admin.blade.php trong Panel thật, dẫn đến việc không Cache-bust tham số ?v=23-safe.
+
+● Khắc phục: V22.3.1 tự động quét và chèn thẻ script trước </body> hoặc </html> một cách an toàn.
+
+● Cách cài lên Panel chính: Phải có tham số --allow-main và trỏ đúng port thật (ví dụ: port 80).
+
+bash install-v22-3-version-icons-provider-stability.sh \ --panel=/var/www/pterodactyl \ --port=80 \ --yes \ --allow-main \ --restart
+
+● Nếu lần cài trước thất bại, KHÔNG xóa thư mục backup cũ. Khởi chạy lại script cài đặt V22.3.1.
+
+5. Giám sát hệ thống & Khắc phục sự cố Thao tác / Tác vụ Dòng lệnh kiểm tra (Command) Ý nghĩa Kiểm tra Queue Worker systemctl status pteroq --no-pager Đảm bảo trình tải map/modpack đang chạy ổn định.
+
+Theo dõi tiến trình tải Queue journalctl -u pteroq -f Xem log trực tiếp trong khi nhấn Download map/modpack.
+
+Xem lỗi Panel (Laravel Log) tail -f /var/www/pterodactyl/storage/logs/laravel.log Giám sát lỗi API hoặc lỗi giải nén PHP từ backend.
+
+Xóa Cache & Xây dựng lại giao diện php artisan optimize:clear && yarn build:production Dùng khi giao diện không cập nhật tính năng (như Modrinth, Pagination, Icon) do lỗi bộ đệm.
+
+Các lỗi thường gặp khác:
+
+1. "cannot find or open": Lệnh unzip trỏ sai đường dẫn. Hãy kiểm tra lại biến ZIP_FILE. 2. Bấm Download nhưng không phản hồi: Khởi động lại service pteroq, kiểm tra kết nối Wings và dung lượng đĩa trống.
+
+3. Bị từ chối Archive (Modrinth): Do hệ thống an toàn chặn các file ZIP không chứa map hợp lệ.
+
+Yêu cầu archive phải chứa level.dat hoặc uid.dat bên trong.
+
+4. CurseForge báo thiếu API Key: Cần cấu hình key tại mục HOSKT Theme Settings > Addons > Minecraft Mod/Modpack/Plugin Installer.
+
+5. Sau khi cài đặt thành công, không thấy thay đổi: Hard refresh hoặc xóa bộ nhớ đệm (cache) trên trình duyệt để tải icon/bundle mới.
+
+Khuyến cáo cuối: Hãy đảm bảo lưu trữ toàn bộ file ZIP nguyên bản và các gói backup (tại /root/hoskt-native-multi-plugins-v21-backup-...) an toàn phòng trường hợp cần hoàn tác (rollback).
+
+Tổng Hợp Hướng Dẫn Cài Đặt, Nâng Cấp và Vá Lỗi HOSKT (V15 - V22.3.1) Tài liệu này tổng hợp toàn bộ các hướng dẫn cấu hình, cài đặt, xử lý sự cố và lịch sử các bản vá (patch) cho bộ công cụ HOSKT từ V15 đến V22.3.1.
+
+Các quy trình đều hướng dẫn thao tác an toàn trên môi trường Panel Test trước khi áp dụng lên Panel thật.
+
+1. Lịch sử các bản vá lỗi (Từ V15 đến V20.1) Phần này tổng hợp các sửa đổi chuyên sâu về giao diện, tính năng và backend trước khi đạt đến phiên bản lớn V22.
+
+1.1. Bản vá giao diện di động & Hệ thống tiện ích (V15 - V17)
+
+● V15 (Mobile Native Sidebar + Logo Target Fix): Sửa lỗi logic chèn logo vào các tool (như Classic Colors, Rainbow Builder).
+
+Script dò tìm logo tự động chỉ quét những khu vực chính xác của header thay vì rải khắp thẻ div/span trong body.
+
+● V16 (Mobile Copy/Input Crash Fix): Khắc phục tính năng Copy không hoạt động khi truy cập qua HTTP (port 8081).
+
+Cập nhật fallback document.execCommand('copy') cho kết nối không có chứng chỉ SSL.
+
+Ngoài ra, sửa lỗi crash React (ErrorBoundary) trong công cụ MOTD Creator khi nhập ký tự & đơn lẻ.
+
+● V17 (Preset Aspect Contrast Fix): Cải thiện khả năng đọc chữ (tương phản sáng/tối).
+
+Ép chữ tên preset được chọn trong Rainbow Builder luôn sáng.
+
+Tự động chọn chữ đen hoặc trắng theo độ sáng thực tế của từng ô màu trong MOTD Creator (để mã &0..&f dễ đọc).
+
+Giữ nguyên parser an toàn cho &, &&, &r, Hello & và không làm đổi cấu trúc sidebar, logo hay màu nền theme.
+
+1.2. Bản vá Backend, Route & Version Manager (V18 - V20.1)
+
+● V18 (Manager/Provider Fix): Bổ sung Backend API cho Mod Manager (để xóa lỗi "This addon is not installed"), World Manager (báo lỗi rõ ràng khi cấu hình sai CurseForge API Key).
+
+Modrinth hoạt động không cần API Key, nhưng CurseForge vẫn cần key khai báo trong Theme Settings.
+
+● V19 (Modpack Route Shadow Fix): Khắc phục triệt để lỗi "Feature Not Available" trên /modpacks do route cũ của theme chèn đè lên route mới từ V18.
+
+Script chỉ vá duy nhất bộ định tuyến (router) của React, xóa route cũ.
+
+● V20.1 (Version Manager & Native Catalogue): ○ Xóa phụ thuộc ảnh CDN bên ngoài (bagou) trong Version Manager, bổ sung 16 icon SVG local. ○ Hỗ trợ Native catalogue cho hàng loạt core: Vanilla, Snapshot, Spigot, Paper, Purpur, SpongeVanilla, BungeeCord, Waterfall, Velocity, Forge, Fabric, Mohist, Magma và CatServer.
+
+○ Đặc biệt: Spigot dùng BuildTools và Forge dùng Installer chính thức. Cả hai sẽ hoàn tất tiến trình cài đặt libraries ở lần khởi động server đầu tiên.
+
+○ Tự động chọn đúng phiên bản Java (8/16/17/21/25) theo đời Minecraft. (Cần chạy migrate để bổ sung image java_25 cho các bản Minecraft 26.1+).
+
+○ Route Modpacks chuyển sang trang Modpacks Manager native của V18/V19, CurseForge Modpacks tự đọc API key từ cài đặt theme.
+
+2. Tính năng chính trên các bản V22 (V22 - V22.3.1)
+
+● Bảo toàn nguyên vẹn mọi cấu trúc bản vá V9 đến V20.1 byte-for-byte. ● World Manager (Modrinth): Tích hợp nguồn Modrinth, tự động tải kết quả theo từ khóa mặc định.
+
+Hỗ trợ giải nén an toàn qua Queue worker (pteroq) và hỗ trợ đa định dạng ZIP, TAR, MRPACK.
+
+Yêu cầu archive phải chứa level.dat hoặc uid.dat.
+
+● Version Manager (CDN & Icon): Tích hợp icon qua hệ thống máy chủ CDN tĩnh. Hỗ trợ Fallback xuống ảnh Local dự phòng (PNG -> SVG -> Default SVG).
+
+Danh sách Modpack được nhúng trực tiếp (Inline).
+
+● Pagination (Cải tiến Giao diện): Bổ sung thanh phân trang (Page X of Y) và ô nhảy số trang cho Mod Manager, World Manager và Version Manager.
+
+● V22.3.1 (Dynamic Logo Real Panel Fix): Sửa dứt điểm lỗi dò tìm vị trí thẻ DOM ở wrapper.blade.php và admin.blade.php trên Panel thật.
+
+Đảm bảo script được chèn an toàn trước thẻ </body>.
+
+3. Lưu ý quan trọng & Chuẩn bị hệ thống
+
+● Môi trường thử nghiệm: Luôn cài đặt lên Panel Test trước (Ví dụ:
+
+/var/www/pterodactyl-test, port 8081).
+
+Panel test phải dùng database độc lập để không ảnh hưởng dữ liệu chính.
+
+● Biên dịch giao diện (Frontend): Không dùng tùy chọn --no-build. Giao diện (React/Yarn) cần được Build lại hoàn chỉnh.
+
+4. Lệnh cài đặt nhanh cho Panel Test Dưới đây là các lệnh cài đặt trọn gói (nhanh) cho phiên bản V22.1 và V22.2 trên Panel Test.
+
+4.1. Lệnh cài nhanh HOSKT V22.1
+
+# Gi ả i nén và chuy ể n th ư m ụ c:
+
+cd /var/www/pterodactyl-test/hoskt_native_multi_plugins_merge_v22_modri nth_world
+
+#
+
+Dry-run:
+
+bash install-v22-1-pagination-modpacks-cdn-fix.sh --panel=/var/www/pterodactyl-test --port=8081 --yes --dry-run
+
+#
+
+Cài đ ặ t th ậ t (Restart t ự đ ộ ng):
+
+bash install-v22-1-pagination-modpacks-cdn-fix.sh --panel=/var/www/pterodactyl-test --port=8081 --yes --restart
+
+#
+
+Ki ể m tra log và d ị ch v ụ :
+
+systemctl restart pteroq systemctl restart nginx systemctl status pteroq --no-pager journalctl -u pteroq -f
+
+4.2. Lệnh cài nhanh HOSKT V22.2 ZIP_FILE="/var/www/pterodactyl/hoskt_native_multi_plugins_merge_v22_ 2_vanilla_cdn_complete_install_guide.zip" unzip -t "$ZIP_FILE"
+
+#
+
+Xóa th ư m ụ c c ũ và gi ả i nén b ả n m ớ i:
+
+rm -rf /var/www/pterodactyl-test/hoskt_native_multi_plugins_merge_v22_modri nth_world unzip -o "$ZIP_FILE" -d /var/www/pterodactyl-test cd /var/www/pterodactyl-test/hoskt_native_multi_plugins_merge_v22_modri nth_world
+
+#
+
+Dry-run:
+
+bash install-v22-2-vanilla-cdn-complete.sh --panel=/var/www/pterodactyl-test --port=8081 --yes --dry-run
+
+# Cài đ ặ t th ậ t:
+
+bash install-v22-2-vanilla-cdn-complete.sh --panel=/var/www/pterodactyl-test --port=8081 --yes --restart
+
+#
+
+Restart d ị ch v ụ :
+
+systemctl restart pteroq systemctl restart nginx systemctl status pteroq --no-pager
+
+5. Cài đặt HOSKT V22.3.1 lên Panel Thật (Real Panel) Khi đã kiểm tra kỹ trên bản Test, bạn tiến hành cài đặt lên hệ thống thật.
+
+bash install-v22-3-version-icons-provider-stability.sh \ --panel=/var/www/pterodactyl \ --port=80 \ --yes \ --allow-main \ --restart
+
+● Tham số --allow-main là bắt buộc để xác nhận cài lên hệ thống chạy production.
+
+6. Giám sát & Khắc phục lỗi thường gặp Sự cố Lệnh kiểm tra / Cách xử lý Queue Worker pteroq dừng / Map không tải systemctl status pteroq --no-pager Theo dõi: journalctl -u pteroq -f Lỗi chức năng / Blank Page / HTTP 500 tail -f /var/www/pterodactyl/storage/logs/laravel.log Thiếu API CurseForge Bổ sung key vào .env (Biến CURSEFORGE_API_KEY). Chạy lệnh Sự cố Lệnh kiểm tra / Cách xử lý optimize:clear sau khi sửa file .env.

@@ -1,0 +1,4 @@
+# V19 route-shadow logic protected by the approved V22.3.1 preservation baseline.
+7b54fe4af93125b188504ce079bf32ef5057dd9bfa3879c134f2a99cd0add67c  tools/patch_hoskt_native_multi.py
+9bb323cc242934b0a5f6b071d6f3d5d253f4b615fa2a7785a0c6bf434d1fe62e  tools/check_modpack_route_shadow_fix.py
+cf178f2bcf9c2bc384424c132541ba48f6ce917c1b8ca808e9c8c59d3b458697  MOBILE_MODPACK_ROUTE_SHADOW_FIX_V19.txt
